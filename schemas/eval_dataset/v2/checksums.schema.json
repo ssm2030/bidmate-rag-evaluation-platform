@@ -1,0 +1,7 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["files"],
+  "properties": {"files":{"type":"object","additionalProperties":{"type":"string","pattern":"^[0-9a-f]{64}$"}}}
+}

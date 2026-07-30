@@ -1,0 +1,7 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["dataset_id", "schema_version", "taxonomy_version", "artifact_version", "parent_artifact_version", "source_set_hash", "generation_profile", "created_at", "status", "files"],
+  "properties": {"dataset_id":{"type":"string","format":"uuid"},"schema_version":{"const":"2.0.0"},"taxonomy_version":{"const":"1.0.0"},"artifact_version":{"type":"integer","minimum":1},"parent_artifact_version":{"type":["integer","null"]},"source_set_hash":{"type":"string","pattern":"^[0-9a-f]{64}$"},"generation_profile":{"type":"object"},"created_at":{"type":"string","format":"date-time"},"status":{"enum":["candidate","approved"]},"files":{"type":"array"}}
+}

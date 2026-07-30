@@ -88,11 +88,36 @@ def _scan_blob(relative: str, data: bytes, policy: PublicationPolicy) -> list[Fi
     return findings
 
 
+def _candidate_paths(root: Path) -> list[Path]:
+    if (root / ".git").exists():
+        result = subprocess.run(
+            [
+                "git",
+                "-C",
+                str(root),
+                "ls-files",
+                "-z",
+                "--cached",
+                "--others",
+                "--exclude-standard",
+            ],
+            capture_output=True,
+            check=True,
+        )
+        relatives = [
+            item.decode("utf-8", errors="surrogateescape")
+            for item in result.stdout.split(b"\0")
+            if item
+        ]
+        return [root / Path(relative) for relative in sorted(relatives)]
+    return sorted(root.rglob("*"), key=lambda item: item.as_posix())
+
+
 def scan_worktree(root: Path, policy: PublicationPolicy) -> list[Finding]:
     root = root.resolve()
     findings = []
     present = set()
-    for path in sorted(root.rglob("*"), key=lambda item: item.as_posix()):
+    for path in _candidate_paths(root):
         relative = path.relative_to(root).as_posix()
         if relative == ".git" or relative.startswith(".git/"):
             continue
@@ -159,7 +184,7 @@ def main() -> None:
         for finding in findings:
             print(f"FINDING {finding.rule} {finding.path} {finding.detail}")
         raise SystemExit(1)
-    sizes = [path.stat().st_size for path in args.root.rglob("*") if path.is_file() and ".git" not in path.parts]
+    sizes = [path.stat().st_size for path in _candidate_paths(args.root) if path.is_file()]
     print("PROMPT_COUNT=16")
     print(f"MAX_FILE_BYTES={max(sizes, default=0)}")
     print("PUBLICATION_SAFETY_STATUS=PASS")

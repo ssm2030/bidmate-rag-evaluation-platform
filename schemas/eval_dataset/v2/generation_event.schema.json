@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["event_id", "item_id", "run_id", "stage", "status", "prompt_bundle_hash", "input_checksum", "output_checksum", "cost_microusd", "created_at"],
+  "properties": {
+    "event_id": {"type": "string", "format": "uuid"},
+    "item_id": {"type": "string", "format": "uuid"},
+    "run_id": {"type": "string", "minLength": 1},
+    "stage": {"enum": ["evidence_select", "question_generate", "quality_review", "export"]},
+    "status": {"enum": ["started", "completed", "retryable", "failed"]},
+    "prompt_bundle_hash": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "input_checksum": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "output_checksum": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "cost_microusd": {"type": "integer", "minimum": 0},
+    "created_at": {"type": "string", "format": "date-time"},
+    "error_code": {"type": ["string", "null"]}
+  }
+}
