@@ -1,0 +1,1 @@
+"""Clean-room publication tooling for the BidMate portfolio."""

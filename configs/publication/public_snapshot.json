@@ -1,0 +1,85 @@
+{
+  "schema_version": 1,
+  "include_roots": [
+    "src",
+    "tests",
+    "web",
+    "app",
+    "n8n/workflows",
+    "scripts",
+    "configs",
+    "schemas",
+    "prompts/eval_dataset",
+    "docker"
+  ],
+  "include_files": [
+    "pyproject.toml",
+    "uv.lock",
+    "package-lock.json",
+    ".env.example",
+    "P1_C1_F1_S1_T1.md",
+    "P2_C2_F2_S2_T2.md",
+    "P3_C2_F3_S2_T3.md",
+    "P3_C3_F3_S3_T3.md",
+    "P3_C3_F3_S3_T5.md",
+    "P4_C4_F4_S4_T4.md",
+    ".github/workflows/publication-safety.yml"
+  ],
+  "exclude_globs": [
+    "**/.git/**",
+    "**/.next/**",
+    "**/node_modules/**",
+    "**/__pycache__/**",
+    "**/.pytest_cache/**",
+    "**/.ruff_cache/**",
+    "artifacts/**",
+    "data/**",
+    "configs/experiments/generated2/**",
+    "docs/superpowers/**",
+    "APPROVED_IMPLEMENTATION_PACKET*.json",
+    "DELIVERY_EVIDENCE*.json"
+  ],
+  "external_markdown": {
+    "Master_QA_Print_Sheet_v6.md": "docs/reference/Master_QA_Print_Sheet_v6.md",
+    "Master_QA_Print_Sheet_v7.md": "docs/reference/Master_QA_Print_Sheet_v7.md",
+    "Project-structure.md": "docs/reference/Project-structure.md",
+    "RAG_Batch_Control_Plan.md": "docs/reference/RAG_Batch_Control_Plan.md",
+    "RAG_Evaluation_SOP.md": "docs/reference/RAG_Evaluation_SOP.md",
+    "평가 로직 수정.md": "docs/reference/평가 로직 수정.md"
+  },
+  "prompt_paths": [
+    "P1_C1_F1_S1_T1.md",
+    "P2_C2_F2_S2_T2.md",
+    "P3_C2_F3_S2_T3.md",
+    "P3_C3_F3_S3_T3.md",
+    "P3_C3_F3_S3_T5.md",
+    "P4_C4_F4_S4_T4.md",
+    "configs/prompts/default.yaml",
+    "configs/prompts/prompt_P1_C1_F1_S1_T1.yaml",
+    "configs/prompts/prompt_P2_C2_F2_S2_T2.yaml",
+    "configs/prompts/prompt_P3_C2_F3_S2_T3.yaml",
+    "configs/prompts/prompt_P3_C3_F3_S3_T3.yaml",
+    "configs/prompts/prompt_P3_C3_F3_S3_T5.yaml",
+    "configs/prompts/prompt_P4_C4_F4_S4_T4.yaml",
+    "prompts/eval_dataset/evidence_selector_v1.md",
+    "prompts/eval_dataset/quality_reviewer_v1.md",
+    "prompts/eval_dataset/question_generator_v1.md"
+  ],
+  "expected_prompt_count": 16,
+  "max_prompt_count": 19,
+  "max_file_bytes": 10485760,
+  "forbidden_extensions": [
+    ".pdf",
+    ".hwp",
+    ".hwpx",
+    ".doc",
+    ".docx",
+    ".zip",
+    ".7z",
+    ".rar"
+  ],
+  "allowed_loopback_hosts": [
+    "127.0.0.1",
+    "localhost"
+  ]
+}
