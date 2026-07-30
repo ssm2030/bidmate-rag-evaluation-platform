@@ -1,7 +1,9 @@
 """generated2 yaml 프롬프트 컴포넌트 조합 모듈."""
 
 from __future__ import annotations
+
 from pathlib import Path
+
 import yaml
 
 

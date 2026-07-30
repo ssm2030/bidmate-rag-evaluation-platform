@@ -254,7 +254,6 @@ import json
 from unittest.mock import MagicMock
 
 from bidmate_rag.providers.llm.base import RewriteResponse
-from bidmate_rag.retrieval.multiturn import rewrite_query_with_history
 
 
 def test_llm_rewrite_extracts_section_hint_from_json_response() -> None:

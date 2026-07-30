@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from types import SimpleNamespace
 from pathlib import Path
+from types import SimpleNamespace
 
 
 def test_run_rag_passes_history_and_retrieval_config(monkeypatch, capsys) -> None:

@@ -1,6 +1,7 @@
 """PEFT-ready utility helpers."""
 
 from __future__ import annotations
+
 import json
 import logging
 from dataclasses import dataclass, field
@@ -34,8 +35,8 @@ class TrainingConfig:
     use_qlora: bool = False
 
 def load_base_model(base_model: str, use_qlora: bool = False):
-    from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
     import torch
+    from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
 
     tokenizer = AutoTokenizer.from_pretrained(base_model, trust_remote_code=True)
     if tokenizer.pad_token is None:
@@ -64,7 +65,7 @@ def load_base_model(base_model: str, use_qlora: bool = False):
     return model, tokenizer
 
 def apply_lora(model, lora_config: LoRAConfig, use_qlora: bool = False):
-    from peft import LoraConfig, get_peft_model, prepare_model_for_kbit_training, TaskType
+    from peft import LoraConfig, TaskType, get_peft_model, prepare_model_for_kbit_training
 
     if use_qlora:
         model = prepare_model_for_kbit_training(model)
@@ -149,9 +150,9 @@ def run_training(
     logger.info(f"어댑터 저장 완료: {adapter_path}")
     return adapter_path
 def load_adapter_model(base_model: str, adapter_path: str | Path):
+    import torch
     from peft import PeftModel
     from transformers import AutoModelForCausalLM, AutoTokenizer
-    import torch
 
     tokenizer = AutoTokenizer.from_pretrained(str(adapter_path), trust_remote_code=True)
     base = AutoModelForCausalLM.from_pretrained(

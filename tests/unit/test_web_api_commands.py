@@ -2,9 +2,7 @@
 
 from __future__ import annotations
 
-import pytest
-
-from bidmate_rag.web_api.commands import COMMAND_REGISTRY, SlashCommand
+from bidmate_rag.web_api.commands import COMMAND_REGISTRY
 
 
 def test_registry_has_twelve_commands() -> None:

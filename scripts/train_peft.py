@@ -31,11 +31,11 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(mess
 logger = logging.getLogger(__name__)
 
 from bidmate_rag.training.peft import (
+    LoRAConfig,
+    TrainingConfig,
     build_sft_record,
     default_adapter_dir,
     run_training,
-    LoRAConfig,
-    TrainingConfig,
 )
 
 
@@ -135,7 +135,7 @@ def main() -> None:
         training_config=training_config,
     )
 
-    print(f"✅ 학습 완료!")
+    print("✅ 학습 완료!")
     print(f"어댑터 저장 경로: {adapter_path}")
     print(f"사용 방법: --adapter-path {adapter_path}")
 

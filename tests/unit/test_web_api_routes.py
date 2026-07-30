@@ -113,7 +113,7 @@ def test_get_commands_returns_twelve(client) -> None:
 
 from unittest.mock import patch
 
-from bidmate_rag.schema import GenerationResult, Chunk, RetrievedChunk
+from bidmate_rag.schema import Chunk, GenerationResult, RetrievedChunk
 
 
 def _make_generation_result(

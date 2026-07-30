@@ -64,6 +64,7 @@ ml = [
 packages = ["src/bidmate_rag"]
 
 [tool.pytest.ini_options]
+addopts = ["--import-mode=importlib"]
 pythonpath = [".", "src"]
 testpaths = ["tests"]
 

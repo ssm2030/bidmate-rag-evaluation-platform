@@ -2,14 +2,16 @@
 
 from __future__ import annotations
 
+import re
 import time
-from uuid import uuid4
 from pathlib import Path
+from uuid import uuid4
+
 from bidmate_rag.config.prompts import build_rag_user_prompt
 from bidmate_rag.generation.context_builder import build_numbered_context_block
 from bidmate_rag.providers.llm.base import BaseLLMProvider, RewriteResponse
 from bidmate_rag.schema import GenerationResult, RetrievedChunk
-import re
+
 
 class HFLocalLLM(BaseLLMProvider):
     def __init__(self, model_name: str, 

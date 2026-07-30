@@ -53,7 +53,7 @@ def main() -> None:
 
         # 1. ingest (chunking_1000_150는 이미 있으므로 skip)
         if cfg["name"] != "chunking_1000_150":
-            print(f"  → ingest 실행 중...")
+            print("  → ingest 실행 중...")
             run([
                 sys.executable, "scripts/ingest_data.py",
                 "--experiment-config", cfg["config"],
@@ -61,7 +61,7 @@ def main() -> None:
             ])
 
         # 2. build_index
-        print(f"  → build_index 실행 중...")
+        print("  → build_index 실행 중...")
         run([
             sys.executable, "scripts/build_index.py",
             "--provider-config", PROVIDER,

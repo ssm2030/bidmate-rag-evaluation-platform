@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import subprocess
 from dataclasses import replace
 from pathlib import Path
 
@@ -73,6 +74,21 @@ def test_guard_rejects_pdf_signature_with_safe_extension(tmp_path: Path) -> None
     findings = scan_worktree(root, _policy())
 
     assert any(finding.rule == "pdf-signature" for finding in findings)
+
+
+def test_guard_skips_git_ignored_runtime_files(tmp_path: Path) -> None:
+    root = tmp_path / "public"
+    artifacts = root / "artifacts"
+    artifacts.mkdir(parents=True)
+    (root / ".gitignore").write_text("artifacts/\n", encoding="utf-8")
+    (root / "P1_C1_F1_S1_T1.md").write_text("prompt\n", encoding="utf-8")
+    (artifacts / "synthetic.pdf").write_bytes(b"%PDF-1.4\n")
+    subprocess.run(["git", "init", "--quiet", str(root)], check=True)
+
+    findings = scan_worktree(root, _policy())
+
+    assert not any(finding.path == "artifacts/synthetic.pdf" for finding in findings)
+
 
 def test_builder_sanitizes_public_package_lock_metadata(tmp_path: Path) -> None:
     source = tmp_path / "source"

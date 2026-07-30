@@ -1,12 +1,12 @@
 from bidmate_rag.retrieval.filters import (
-    extract_metadata_filters,
     extract_matched_agencies,
+    extract_metadata_filters,
     extract_project_clues,
     extract_range_filters,
     extract_section_hint,
     is_comparison_query,
-    should_fan_out_multi_source_query,
     should_boost_tables,
+    should_fan_out_multi_source_query,
 )
 
 

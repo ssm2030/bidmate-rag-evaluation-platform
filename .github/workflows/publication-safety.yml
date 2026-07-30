@@ -25,7 +25,9 @@ jobs:
           cache-dependency-path: web/package-lock.json
       - run: uv sync --frozen --group dev
       - run: npm ci
-npm --prefix web ci
+      - run: npm --prefix web ci
+      - run: npm audit --audit-level=high
+      - run: npm --prefix web audit --omit=dev --audit-level=high
       - run: uv run pytest -q
       - run: uv run ruff check src tests scripts
       - run: npm --prefix web run lint
