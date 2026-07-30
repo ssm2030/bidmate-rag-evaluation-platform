@@ -1,0 +1,5 @@
+version: 1.0.0
+task_kinds: [extract, compare, summarize, calculate, follow_up]
+answerability: [answerable, contradiction, unanswerable]
+evidence_modes: [direct_quote, table, multi_evidence, none]
+review_statuses: [draft, needs_anchor_fix, needs_review, approved, rejected]

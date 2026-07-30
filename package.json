@@ -1,0 +1,10 @@
+{
+  "name": "bidmate-rag-evaluation-platform",
+  "version": "1.0.0",
+  "private": true,
+  "description": "RAG and evaluation-dataset generation and review platform.",
+  "dependencies": {
+    "kordoc": "^1.7.2",
+    "pdfjs-dist": "^5.6.205"
+  }
+}

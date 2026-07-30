@@ -1,0 +1,31 @@
+reranker_model: null
+enable_multiturn: false
+
+boost:
+  section: 0.0
+  table: 0.0
+  metadata: 0.0
+  max_total: 0.0
+
+hybrid:
+  enabled: false
+  dense_pool_multiplier: 3
+  sparse_pool_multiplier: 3
+  rrf_k: 60
+  anchor_auxiliary: false
+
+rewrite:
+  mode: rule_only
+  max_completion_tokens: 256
+  timeout_seconds: 5
+
+memory:
+  enabled: false
+  summary_buffer:
+    max_recent_turns: 2
+    max_summary_chars: 200
+  slot_memory:
+    enabled: false
+
+debug_trace:
+  enabled: true

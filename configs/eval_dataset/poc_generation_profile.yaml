@@ -1,0 +1,7 @@
+profile_id: local-mock-v1
+provider: mock
+model: mock
+external_transmission_allowed: false
+max_items_per_work_unit: 5
+retry_limit: 1
+cost_limit_microusd: 0

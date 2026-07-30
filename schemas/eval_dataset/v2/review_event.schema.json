@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["event_id", "item_id", "revision", "event_type", "actor", "base_checksum", "result_checksum", "created_at"],
+  "properties": {
+    "event_id": {"type": "string", "format": "uuid"},
+    "item_id": {"type": "string", "format": "uuid"},
+    "revision": {"type": "integer", "minimum": 1},
+    "event_type": {"enum": ["imported", "draft_saved", "anchor_resolved", "approved", "rejected", "forked", "exported"]},
+    "actor": {"type": "string", "minLength": 1},
+    "base_checksum": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "result_checksum": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "changed_fields": {"type": "array", "items": {"type": "string"}},
+    "created_at": {"type": "string", "format": "date-time"}
+  }
+}

@@ -1,0 +1,5 @@
+provider: deterministic-demo
+model: evidence-first-v1
+embedding_model: sha256-feature-hash-v1
+collection_name: bidmate-public-demo
+dimensions: 64

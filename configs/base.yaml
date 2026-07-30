@@ -1,0 +1,4 @@
+project_name: bidmate-rag
+default_retrieval_top_k: 5
+default_chunk_size: 1000
+default_chunk_overlap: 150

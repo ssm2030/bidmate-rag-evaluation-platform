@@ -1,0 +1,6 @@
+name: generation-compare
+mode: generation_only
+provider_configs:
+  - configs/providers/openai_gpt5nano.yaml
+  - configs/providers/openai_gpt5mini.yaml
+  - configs/providers/openai_gpt5.yaml

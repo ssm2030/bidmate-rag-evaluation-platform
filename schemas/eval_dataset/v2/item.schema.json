@@ -1,0 +1,7 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["item_id", "revision", "status", "question", "ground_truth_answer", "task_kind", "document_scope", "answerability", "evidence_mode", "perturbation", "difficulty", "metadata_filter", "history", "verification_notes", "provenance", "evidence_anchors"],
+  "properties": {"item_id":{"type":"string","format":"uuid"},"revision":{"type":"integer","minimum":1},"status":{"enum":["draft","needs_anchor_fix","needs_review","approved","rejected"]},"question":{"type":"string","minLength":1},"ground_truth_answer":{"type":"string","minLength":1},"task_kind":{"enum":["extract","compare","summarize","calculate","follow_up"]},"document_scope":{"enum":["single","multi"]},"answerability":{"enum":["answerable","contradiction","unanswerable"]},"evidence_mode":{"enum":["direct_quote","table","multi_evidence","none"]},"perturbation":{"enum":["none","typo","abbreviation","fragmented"]},"difficulty":{"enum":["low","medium","high"]},"metadata_filter":{"type":"object"},"history":{"type":"array"},"verification_notes":{"type":"array","maxItems":5},"provenance":{"type":"object"},"evidence_anchors":{"type":"array","maxItems":3}}
+}
