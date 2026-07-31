@@ -1,0 +1,89 @@
+{
+  "schema_version": 1,
+  "sources": [
+    {
+      "source_id": "nia-ai-norms-2026",
+      "organization": "National Information Society Agency",
+      "source_page_url": "https://www.nia.or.kr/site/nia_kor/ex/bbs/View.do?bcIdx=29609&cbIdx=78336",
+      "expected_attachment_name": "제안요청서",
+      "document_kind": "RFP"
+    },
+    {
+      "source_id": "nia-public-ai-governance-2026",
+      "organization": "National Information Society Agency",
+      "source_page_url": "https://www.nia.or.kr/site/nia_kor/ex/bbs/View.do?bcIdx=29460&cbIdx=78336",
+      "expected_attachment_name": "제안요청서",
+      "document_kind": "RFP"
+    },
+    {
+      "source_id": "nia-public-data-survey-2026",
+      "organization": "National Information Society Agency",
+      "source_page_url": "https://www.nia.or.kr/site/nia_kor/ex/bbs/View.do?bcIdx=29250&cbIdx=78336",
+      "expected_attachment_name": "제안요청서",
+      "document_kind": "RFP"
+    },
+    {
+      "source_id": "nia-digital-development-2026",
+      "organization": "National Information Society Agency",
+      "source_page_url": "https://www.nia.or.kr/site/nia_kor/ex/bbs/View.do?bcIdx=29176&cbIdx=78336",
+      "expected_attachment_name": "제안요청서",
+      "document_kind": "RFP"
+    },
+    {
+      "source_id": "nia-digital-ethics-web-2026",
+      "organization": "National Information Society Agency",
+      "source_page_url": "https://www.nia.or.kr/site/nia_kor/ex/bbs/View.do?bcIdx=28763&cbIdx=78336",
+      "expected_attachment_name": "제안요청서",
+      "document_kind": "RFP"
+    },
+    {
+      "source_id": "nia-ai-digital-competency-2025",
+      "organization": "National Information Society Agency",
+      "source_page_url": "https://www.nia.or.kr/site/nia_kor/ex/bbs/View.do?bcIdx=28114&cbIdx=78336",
+      "expected_attachment_name": "제안요청서",
+      "document_kind": "RFP"
+    },
+    {
+      "source_id": "bok-cbdc-security-2022",
+      "organization": "Bank of Korea",
+      "source_page_url": "https://www.bok.or.kr/portal/bbs/P0000561/view.do?menuNo=200037&nttId=10070073",
+      "expected_attachment_name": "제안요청서",
+      "document_kind": "RFP"
+    },
+    {
+      "source_id": "bok-fx-review-upgrade-2023",
+      "organization": "Bank of Korea",
+      "source_page_url": "https://www.bok.or.kr/portal/bbs/P0000561/view.do?menuNo=200037&nttId=10080379",
+      "expected_attachment_name": "제안요청서",
+      "document_kind": "RFP"
+    },
+    {
+      "source_id": "bok-statistics-operations-2023",
+      "organization": "Bank of Korea",
+      "source_page_url": "https://www.bok.or.kr/portal/bbs/P0000561/view.do?menuNo=200037&nttId=10081480",
+      "expected_attachment_name": "제안요청서",
+      "document_kind": "RFP"
+    },
+    {
+      "source_id": "bok-gyeonggi-pmo-2024",
+      "organization": "Bank of Korea",
+      "source_page_url": "https://www.bok.or.kr/portal/bbs/P0000561/view.do?menuNo=200037&nttId=10083157",
+      "expected_attachment_name": "제안요청서",
+      "document_kind": "RFP"
+    },
+    {
+      "source_id": "nia-digital-ethics-instructors-2026",
+      "organization": "National Information Society Agency",
+      "source_page_url": "https://www.nia.or.kr/site/nia_kor/ex/bbs/View.do?bcIdx=29191&cbIdx=78336",
+      "expected_attachment_name": "제안요청서",
+      "document_kind": "RFP"
+    },
+    {
+      "source_id": "nia-public-cloud-policy-2025",
+      "organization": "National Information Society Agency",
+      "source_page_url": "https://www.nia.or.kr/site/nia_kor/ex/bbs/View.do?bcIdx=28054&cbIdx=78336",
+      "expected_attachment_name": "제안요청서",
+      "document_kind": "RFP"
+    }
+  ]
+}

@@ -28,3 +28,16 @@ def test_non_default_slot_allocation_is_deterministic_and_sums_to_target() -> No
     assert len(first) == 17
     assert sum(Counter(slot.sop_type for slot in first).values()) == 17
     assert sum(Counter(slot.difficulty for slot in first).values()) == 17
+
+
+def test_five_item_calibration_uses_each_type_in_api_compatible_order() -> None:
+    slots = planner.plan_sop_slots(5)
+
+    assert Counter(slot.sop_type for slot in slots) == {
+        "A": 1,
+        "B": 1,
+        "C": 1,
+        "D": 1,
+        "E": 1,
+    }
+    assert [slot.sop_type for slot in slots] == ["A", "E", "B", "C", "D"]

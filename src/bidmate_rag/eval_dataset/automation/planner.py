@@ -35,9 +35,15 @@ def plan_sop_slots(target_count: int = 30) -> list[SopSlot]:
     type_counts = _largest_remainder(target_count, (9, 12, 3, 3, 3))
     difficulty_names = ("low", "medium", "high")
     difficulty_counts = _largest_remainder(target_count, (15, 9, 6))
-    types = [
-        name for name, count in zip(type_names, type_counts, strict=True) for _ in range(count)
-    ]
+    types = (
+        ["A", "E", "B", "C", "D"]
+        if target_count == len(type_names)
+        else [
+            name
+            for name, count in zip(type_names, type_counts, strict=True)
+            for _ in range(count)
+        ]
+    )
     difficulties = [
         name
         for name, count in zip(difficulty_names, difficulty_counts, strict=True)

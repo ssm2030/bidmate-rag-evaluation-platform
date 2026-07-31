@@ -25,13 +25,13 @@
             {
               "id": "target_count",
               "name": "target_count",
-              "value": 30,
+              "value": "={{ Number($env.BIDMATE_EVAL_TARGET_COUNT || 30) }}",
               "type": "number"
             },
             {
               "id": "mode",
               "name": "mode",
-              "value": "mock",
+              "value": "={{ $env.BIDMATE_EVAL_MODE || 'mock' }}",
               "type": "string"
             },
             {
@@ -39,6 +39,30 @@
               "name": "max_items_per_call",
               "value": 5,
               "type": "number"
+            },
+            {
+              "id": "campaign_key",
+              "name": "campaign_key",
+              "value": "={{ $env.BIDMATE_EVAL_CAMPAIGN_KEY || null }}",
+              "type": "string"
+            },
+            {
+              "id": "data_root",
+              "name": "data_root",
+              "value": "={{ $env.BIDMATE_EVAL_DATA_ROOT || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "cost_limit_microusd",
+              "name": "cost_limit_microusd",
+              "value": "={{ Number($env.BIDMATE_EVAL_COST_LIMIT_MICROUSD || 0) }}",
+              "type": "number"
+            },
+            {
+              "id": "live_authorized",
+              "name": "live_authorized",
+              "value": "={{ $env.BIDMATE_EVAL_LIVE_AUTHORIZED === 'true' }}",
+              "type": "boolean"
             }
           ]
         },
@@ -264,7 +288,7 @@
     },
     {
       "parameters": {
-        "url": "=http://127.0.0.1:8121/v1/runs/{{ $json.run_id }}",
+        "url": "={{ 'http://127.0.0.1:8121/v1/runs/' + $('Create or Resume Run').first().json.run_id }}",
         "options": {}
       },
       "id": "00000000-0000-4000-8000-000000000013",

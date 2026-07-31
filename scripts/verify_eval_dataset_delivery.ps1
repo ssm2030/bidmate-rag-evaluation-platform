@@ -3,14 +3,17 @@ $root = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
 $rebuildRoot = [IO.Path]::GetFullPath((Join-Path $root "artifacts\eval_dataset\rebuild"))
 $finalRoot = Join-Path $rebuildRoot "verification\final"
 $python = Join-Path $root ".venv\Scripts\python.exe"
-$approvalCommand = "APPROVE build-bidmate-eval-tools-rebuild-xhigh-v06 d9cfbcb577c462645aa3c6f853952980dc42b57c05348e581f8302efc18532a3"
-$packetPath = Join-Path $root "APPROVED_IMPLEMENTATION_PACKET_REBUILD_V06.json"
+$approvalCommand = "APPROVE build-bidmate-live-eval-poc-amendment-04-xhigh-v06 b8bfa69619480c0f99007a1f4fa253f74b56988b34dbd40c28bea8733b84710e"
+$packetPath = Join-Path $root "APPROVED_IMPLEMENTATION_PACKET.amendment-04.json"
+$manualRoot = Join-Path $root "artifacts\eval_dataset\manual"
+$manualArtifactsPresentBefore = Test-Path -LiteralPath $manualRoot
 $personalWork = -join [char[]](0xAC1C, 0xC778, 0x20, 0xC791, 0xC5C5)
 $harnessScripts = Join-Path $env:USERPROFILE ("Desktop\{0}\AI-Harness-System\scripts" -f $personalWork)
 $overall = [Diagnostics.Stopwatch]::StartNew()
 $generatorElapsed = 0.0
 $reviewElapsed = 0.0
 $launcherElapsed = 0.0
+$liveStubElapsed = 0.0
 
 Push-Location $root
 try {
@@ -20,19 +23,73 @@ try {
         throw "Final packet validation failed: $($packetOutput -join ' ')"
     }
 
+    $publicationPolicyPath = Join-Path $root "configs\publication\public_snapshot.json"
+    $publicationPolicy = Get-Content -Raw -LiteralPath $publicationPolicyPath | ConvertFrom-Json
+    $presentPromptPaths = @($publicationPolicy.prompt_paths | Where-Object { Test-Path -LiteralPath (Join-Path $root $_) })
+    $promptCount = $presentPromptPaths.Count
+    if ($promptCount -ne [int]$publicationPolicy.expected_prompt_count -or $promptCount -gt [int]$publicationPolicy.max_prompt_count) {
+        throw "prompt count gate failed: expected=$($publicationPolicy.expected_prompt_count), max=$($publicationPolicy.max_prompt_count), actual=$promptCount"
+    }
+
+    $trackedPaths = @(git -c core.quotepath=false ls-files)
+    if ($LASTEXITCODE -ne 0) { throw "tracked-path inventory failed" }
+    $trackedForbidden = [Collections.Generic.List[string]]::new()
+    $trackedLarge = [Collections.Generic.List[string]]::new()
+    foreach ($trackedPath in $trackedPaths) {
+        $trackedFullPath = Join-Path $root $trackedPath
+        if (-not (Test-Path -LiteralPath $trackedFullPath -PathType Leaf)) { continue }
+        $trackedSuffix = [IO.Path]::GetExtension($trackedPath).ToLowerInvariant()
+        if (@($publicationPolicy.forbidden_extensions) -contains $trackedSuffix) { $trackedForbidden.Add($trackedPath) }
+        if ((Get-Item -LiteralPath $trackedFullPath).Length -gt [int64]$publicationPolicy.max_file_bytes) { $trackedLarge.Add($trackedPath) }
+    }
+    if ($trackedForbidden.Count -gt 0) { throw "tracked forbidden artifacts detected: $($trackedForbidden -join ", ")" }
+    if ($trackedLarge.Count -gt 0) { throw "tracked files exceed max_file_bytes: $($trackedLarge -join ", ")" }
+
+    $publicationWorktreeArgs = @("--root", ".", "--scope", "worktree")
+    $publicationWorktreeOutput = @(& $python -m scripts.publication.verify_public_snapshot @publicationWorktreeArgs 2>&1)
+    $publicationWorktreeExit = $LASTEXITCODE
+    $allowedImmutablePublicationFindings = @(
+        "FINDING absolute-user-path STATE.md matched a prohibited text pattern",
+        "FINDING absolute-user-path WORK_PLAN.md matched a prohibited text pattern",
+        "FINDING absolute-user-path docs/live-eval-poc-design.md matched a prohibited text pattern",
+        "FINDING email-address docs/superpowers/plans/2026-07-31-bidmate-live-eval-poc.md matched a prohibited text pattern"
+    ) | Sort-Object
+    [string[]]$actualPublicationFindings = @($publicationWorktreeOutput | Where-Object { $_ -like "FINDING *" } | Sort-Object)
+    $publicationCleanPass = $publicationWorktreeExit -eq 0 -and
+        $actualPublicationFindings.Count -eq 0 -and
+        ($publicationWorktreeOutput -join "`n") -match "PUBLICATION_SAFETY_STATUS=PASS"
+    $publicationAllowlistPass = $false
+    if ($actualPublicationFindings.Count -gt 0) {
+        $publicationDifference = @(Compare-Object -ReferenceObject $allowedImmutablePublicationFindings -DifferenceObject $actualPublicationFindings)
+        $publicationAllowlistPass = $publicationWorktreeExit -eq 1 -and $publicationDifference.Count -eq 0
+    }
+    if (-not $publicationCleanPass -and -not $publicationAllowlistPass) {
+        throw "worktree publication scan differs from the exact manifested immutable allowlist: $($publicationWorktreeOutput -join ' | ')"
+    }
+    $publicationObjectArgs = @("--root", ".", "--scope", "objects")
+    $publicationObjectOutput = @(& $python -m scripts.publication.verify_public_snapshot @publicationObjectArgs 2>&1)
+    if ($LASTEXITCODE -ne 0 -or ($publicationObjectOutput -join "`n") -notmatch "PUBLICATION_SAFETY_STATUS=PASS") {
+        throw "Git object publication scan failed: $($publicationObjectOutput -join ' | ')"
+    }
+
     $secretHits = @(rg -n --glob "!artifacts/**" --glob "!*.lock" "(?i)(sk-[a-z0-9]{20,}|bearer\s+[a-z0-9._-]{12,})" src configs prompts n8n scripts web 2>$null)
     if ($LASTEXITCODE -eq 0 -and $secretHits.Count -gt 0) { throw "secret-like delivery content detected: $($secretHits[0])" }
     if ($LASTEXITCODE -gt 1) { throw "secret scan failed" }
 
     $expectedNodes = [ordered]@{
         "n8n/workflows/bidmate_eval_generate_v1.json" = 17
-        "n8n/workflows/bidmate_eval_process_work_unit_v1.json" = 24
+        "n8n/workflows/bidmate_eval_process_work_unit_v1.json" = 33
         "n8n/workflows/bidmate_eval_retry_failed_v1.json" = 8
     }
     foreach ($entry in $expectedNodes.GetEnumerator()) {
         $workflow = Get-Content -Raw -LiteralPath $entry.Key | ConvertFrom-Json
         if (@($workflow.nodes).Count -ne $entry.Value) {
             throw "workflow node count mismatch for $($entry.Key): expected $($entry.Value), found $(@($workflow.nodes).Count)"
+        }
+        foreach ($node in @($workflow.nodes)) {
+            if ($null -ne $node.PSObject.Properties["credentials"] -and $null -ne $node.credentials) {
+                throw "workflow contains tracked credentials: $($entry.Key) node=$($node.name)"
+            }
         }
         $workflowText = Get-Content -Raw -LiteralPath $entry.Key
         $remoteUrls = @([regex]::Matches($workflowText, "https?://(?!127\.0\.0\.1)"))
@@ -55,11 +112,30 @@ try {
     uv run ruff check src/bidmate_rag/eval_dataset tests/eval_dataset app/eval_ui.py src/bidmate_rag/evaluation/dataset.py src/bidmate_rag/evaluation/schema_validator.py tests/unit/test_eval_correctness.py tests/unit/test_eval_ui_readonly.py tests/unit/test_schema_validator.py
     if ($LASTEXITCODE -ne 0) { throw "Ruff validation failed" }
 
-    $generatorTimer = [Diagnostics.Stopwatch]::StartNew()
-    & powershell -NoProfile -ExecutionPolicy Bypass -File scripts\test_eval_automation_mock.ps1
-    if ($LASTEXITCODE -ne 0) { throw "n8n generator integration failed" }
-    $generatorTimer.Stop()
-    $generatorElapsed = [math]::Round($generatorTimer.Elapsed.TotalSeconds, 3)
+    $previousN8nBlockEnvAccess = [Environment]::GetEnvironmentVariable("N8N_BLOCK_ENV_ACCESS_IN_NODE")
+    try {
+        $env:N8N_BLOCK_ENV_ACCESS_IN_NODE = 'false'
+        $generatorTimer = [Diagnostics.Stopwatch]::StartNew()
+        & powershell -NoProfile -ExecutionPolicy Bypass -File scripts\test_eval_automation_mock.ps1
+        if ($LASTEXITCODE -ne 0) { throw "n8n generator integration failed" }
+        $generatorTimer.Stop()
+        $generatorElapsed = [math]::Round($generatorTimer.Elapsed.TotalSeconds, 3)
+    } finally {
+        if ($null -eq $previousN8nBlockEnvAccess) {
+            Remove-Item Env:N8N_BLOCK_ENV_ACCESS_IN_NODE -ErrorAction SilentlyContinue
+        } else {
+            $env:N8N_BLOCK_ENV_ACCESS_IN_NODE = $previousN8nBlockEnvAccess
+        }
+    }
+    if ($env:N8N_BLOCK_ENV_ACCESS_IN_NODE -eq 'false') {
+        throw "full verifier requires n8n environment access to remain blocked outside the mock child"
+    }
+
+    $liveStubTimer = [Diagnostics.Stopwatch]::StartNew()
+    & powershell -NoProfile -ExecutionPolicy Bypass -File scripts\test_eval_automation_live_stub.ps1
+    if ($LASTEXITCODE -ne 0) { throw 'n8n live-stub E2E failed' }
+    $liveStubTimer.Stop()
+    $liveStubElapsed = [math]::Round($liveStubTimer.Elapsed.TotalSeconds, 3)
 
     npm --prefix web run lint
     if ($LASTEXITCODE -ne 0) { throw "review web lint failed" }
@@ -115,7 +191,7 @@ try {
     }
     git diff --quiet HEAD -- src/bidmate_rag/storage/metadata_store.py
     if ($LASTEXITCODE -ne 0) { throw "branch content changed protected metadata_store.py" }
-    if (-not (Test-Path -LiteralPath (Join-Path $root "artifacts\eval_dataset\manual"))) {
+    if ($manualArtifactsPresentBefore -and -not (Test-Path -LiteralPath $manualRoot)) {
         throw "pre-existing manual artifacts are missing"
     }
     git diff --check
@@ -134,11 +210,20 @@ try {
     $overall.Stop()
     $summary = [ordered]@{
         status = "PASS"
-        packet_id = "build-bidmate-eval-tools-rebuild-xhigh-v06"
-        packet_content_hash = "d9cfbcb577c462645aa3c6f853952980dc42b57c05348e581f8302efc18532a3"
+        packet_id = "build-bidmate-live-eval-poc-amendment-04-xhigh-v06"
+        packet_content_hash = "b8bfa69619480c0f99007a1f4fa253f74b56988b34dbd40c28bea8733b84710e"
         pytest_passed = $pytestPassed
-        workflow_nodes = [ordered]@{ generate = 17; process = 24; retry = 8 }
+        workflow_nodes = [ordered]@{ generate = 17; process = 33; retry = 8 }
+        prompt_count = $promptCount
+        prompt_limit = [int]$publicationPolicy.max_prompt_count
+        tracked_forbidden_artifacts = $trackedForbidden.Count
+        tracked_large_files = $trackedLarge.Count
+        workflow_auth_leakage = 0
+        publication_worktree = "pass_with_manifested_immutable_allowlist"
+        publication_git_objects = "pass"
         generator_seconds = $generatorElapsed
+        live_stub_e2e = "pass"
+        live_stub_seconds = $liveStubElapsed
         review_e2e_seconds = $reviewElapsed
         launcher_seconds = $launcherElapsed
         total_seconds = [math]::Round($overall.Elapsed.TotalSeconds, 3)

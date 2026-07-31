@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "currency": "USD",
+  "hard_cap_microusd": 5000000,
+  "operational_cap_microusd": 4500000,
+  "reserve_microusd": 500000,
+  "price_verified_at": "2026-07-31",
+  "price_source_url": "https://developers.openai.com/api/docs/models/compare",
+  "stages": {
+    "selector": {
+      "model": "gpt-5.6-luna",
+      "input_microusd_per_million": 1000000,
+      "output_microusd_per_million": 6000000,
+      "max_output_tokens": 900,
+      "reasoning_effort": "low"
+    },
+    "generator": {
+      "model": "gpt-5.6-terra",
+      "input_microusd_per_million": 2500000,
+      "output_microusd_per_million": 15000000,
+      "max_output_tokens": 1400,
+      "reasoning_effort": "low"
+    },
+    "reviewer": {
+      "model": "gpt-5.6-terra",
+      "input_microusd_per_million": 2500000,
+      "output_microusd_per_million": 15000000,
+      "max_output_tokens": 900,
+      "reasoning_effort": "low"
+    }
+  }
+}
