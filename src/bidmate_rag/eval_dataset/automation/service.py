@@ -399,19 +399,30 @@ def build_run_identity(
     *,
     target_count: int,
     mode: str = "mock",
+    campaign_key: str | None = None,
+    data_root: Path | str | None = None,
+    prompt_bundle_hash: str | None = None,
 ) -> dict[str, int | str]:
-    if mode != "mock":
-        raise ValueError("live run identity requires separately approved provider configuration")
-    return {
+    if mode not in {"mock", "live"}:
+        raise ValueError("mode must be mock or live")
+    identity: dict[str, int | str] = {
         "batch_id": inventory.batch_id,
         "mode": mode,
         "slot_plan_hash": _slot_plan_hash(target_count),
-        "prompt_bundle_hash": PROMPT_BUNDLE_HASH,
+        "prompt_bundle_hash": prompt_bundle_hash or PROMPT_BUNDLE_HASH,
         "contract_version": CONTRACT_VERSION,
-        "provider_model": MOCK_PROVIDER_MODEL,
+        "provider_model": (
+            MOCK_PROVIDER_MODEL if mode == "mock" else "responses-api-guarded-v1"
+        ),
         "document_set_hash": _document_set_hash(inventory),
     }
-
+    if mode == "live":
+        normalized_campaign_key = (campaign_key or "").strip()
+        if not normalized_campaign_key or data_root is None or not str(data_root).strip():
+            raise ValueError("live run identity requires campaign_key and data_root")
+        identity["campaign_key"] = normalized_campaign_key
+        identity["data_root"] = str(Path(data_root).expanduser().resolve(strict=False))
+    return identity
 
 def _summary(
     ledger: AutomationLedger,

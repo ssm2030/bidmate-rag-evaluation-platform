@@ -27,6 +27,16 @@ data/
 *.safetensors
 __pycache__/
 .pytest_cache/
+
+# Local delivery and implementation-governance evidence
+/APPROVED_IMPLEMENTATION_PACKET*.json
+/ARCHITECTURE_DECISIONS.json
+/DELIVERY_EVIDENCE.json
+/STATE.md
+/WORK_PLAN.md
+/docs/live-eval-poc-amendment-*.md
+/docs/live-eval-poc-design.md
+/docs/superpowers/
 .ruff_cache/
 test-results/
 playwright-report/

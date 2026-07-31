@@ -91,11 +91,77 @@
       ]
     },
     {
-      "parameters": {},
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.resume_stage }}",
+                    "rightValue": "selector",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.resume_stage }}",
+                    "rightValue": "generator",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra"
+        }
+      },
+      "id": "00000000-0000-4000-8000-000000000032",
+      "name": "Resume Stage",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        640,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=http://127.0.0.1:8121/v1/work-units/{{ $json.work_unit_id }}/selector/prepare",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { attempt: $json.attempts } }}",
+        "options": {
+          "timeout": 600000
+        }
+      },
       "id": "00000000-0000-4000-8000-000000000005",
-      "name": "Build Selector Request",
-      "type": "n8n-nodes-base.noOp",
-      "typeVersion": 1,
+      "name": "Prepare Selector",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
       "position": [
         640,
         0
@@ -159,38 +225,50 @@
     },
     {
       "parameters": {
-        "resource": "text",
-        "operation": "message",
-        "modelId": {
-          "__rl": true,
-          "value": "gpt-4.1-mini",
-          "mode": "list",
-          "cachedResultName": "gpt-4.1-mini"
-        },
-        "messages": {
-          "values": [
+        "method": "POST",
+        "url": "={{ $json.provider_request.url }}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json.provider_request.body }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
             {
-              "content": "={{ $json.prompt }}"
+              "name": "Idempotency-Key",
+              "value": "={{ $json.idempotency_key }}"
             }
           ]
         },
-        "options": {}
+        "options": {
+          "timeout": 600000
+        }
       },
       "id": "00000000-0000-4000-8000-000000000008",
-      "name": "Live Selector",
-      "type": "@n8n/n8n-nodes-langchain.openAi",
-      "typeVersion": 1.8,
+      "name": "OpenAI Selector",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "onError": "continueErrorOutput",
       "position": [
         1120,
         0
       ]
     },
     {
-      "parameters": {},
+      "parameters": {
+        "method": "POST",
+        "url": "=http://127.0.0.1:8121/v1/work-units/{{ $('Claim Work Unit').item.json.work_unit_id }}/selector/normalize",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { provider_call_id: $('Prepare Selector').item.json.provider_call_id, provider_payload: $json } }}",
+        "options": {
+          "timeout": 600000
+        }
+      },
       "id": "00000000-0000-4000-8000-000000000009",
       "name": "Normalize Selector",
-      "type": "n8n-nodes-base.noOp",
-      "typeVersion": 1,
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "onError": "continueErrorOutput",
       "position": [
         1280,
         0
@@ -245,11 +323,20 @@
       ]
     },
     {
-      "parameters": {},
+      "parameters": {
+        "method": "POST",
+        "url": "=http://127.0.0.1:8121/v1/work-units/{{ $json.work_unit_id }}/generator/prepare",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { attempt: $json.attempts } }}",
+        "options": {
+          "timeout": 600000
+        }
+      },
       "id": "00000000-0000-4000-8000-000000000012",
-      "name": "Build Generator Request",
-      "type": "n8n-nodes-base.noOp",
-      "typeVersion": 1,
+      "name": "Prepare Generator",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
       "position": [
         1760,
         0
@@ -313,38 +400,50 @@
     },
     {
       "parameters": {
-        "resource": "text",
-        "operation": "message",
-        "modelId": {
-          "__rl": true,
-          "value": "gpt-4.1-mini",
-          "mode": "list",
-          "cachedResultName": "gpt-4.1-mini"
-        },
-        "messages": {
-          "values": [
+        "method": "POST",
+        "url": "={{ $json.provider_request.url }}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json.provider_request.body }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
             {
-              "content": "={{ $json.prompt }}"
+              "name": "Idempotency-Key",
+              "value": "={{ $json.idempotency_key }}"
             }
           ]
         },
-        "options": {}
+        "options": {
+          "timeout": 600000
+        }
       },
       "id": "00000000-0000-4000-8000-000000000015",
-      "name": "Live Generator",
-      "type": "@n8n/n8n-nodes-langchain.openAi",
-      "typeVersion": 1.8,
+      "name": "OpenAI Generator",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "onError": "continueErrorOutput",
       "position": [
         2240,
         0
       ]
     },
     {
-      "parameters": {},
+      "parameters": {
+        "method": "POST",
+        "url": "=http://127.0.0.1:8121/v1/work-units/{{ $('Claim Work Unit').item.json.work_unit_id }}/generator/normalize",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { provider_call_id: $('Prepare Generator').item.json.provider_call_id, provider_payload: $json } }}",
+        "options": {
+          "timeout": 600000
+        }
+      },
       "id": "00000000-0000-4000-8000-000000000016",
       "name": "Normalize Generator",
-      "type": "n8n-nodes-base.noOp",
-      "typeVersion": 1,
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "onError": "continueErrorOutput",
       "position": [
         2400,
         0
@@ -400,11 +499,20 @@
       ]
     },
     {
-      "parameters": {},
+      "parameters": {
+        "method": "POST",
+        "url": "=http://127.0.0.1:8121/v1/work-units/{{ $json.work_unit_id }}/reviewer/prepare",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { attempt: $json.attempts } }}",
+        "options": {
+          "timeout": 600000
+        }
+      },
       "id": "00000000-0000-4000-8000-000000000019",
-      "name": "Build Reviewer Request",
-      "type": "n8n-nodes-base.noOp",
-      "typeVersion": 1,
+      "name": "Prepare Reviewer",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
       "position": [
         2880,
         0
@@ -468,40 +576,82 @@
     },
     {
       "parameters": {
-        "resource": "text",
-        "operation": "message",
-        "modelId": {
-          "__rl": true,
-          "value": "gpt-4.1-mini",
-          "mode": "list",
-          "cachedResultName": "gpt-4.1-mini"
-        },
-        "messages": {
-          "values": [
+        "method": "POST",
+        "url": "={{ $json.provider_request.url }}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json.provider_request.body }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
             {
-              "content": "={{ $json.prompt }}"
+              "name": "Idempotency-Key",
+              "value": "={{ $json.idempotency_key }}"
             }
           ]
         },
-        "options": {}
+        "options": {
+          "timeout": 600000
+        }
       },
       "id": "00000000-0000-4000-8000-000000000022",
-      "name": "Live Reviewer",
-      "type": "@n8n/n8n-nodes-langchain.openAi",
-      "typeVersion": 1.8,
+      "name": "OpenAI Reviewer",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "onError": "continueErrorOutput",
       "position": [
         3360,
         0
       ]
     },
     {
-      "parameters": {},
+      "parameters": {
+        "method": "POST",
+        "url": "=http://127.0.0.1:8121/v1/work-units/{{ $('Claim Work Unit').item.json.work_unit_id }}/reviewer/normalize",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { provider_call_id: $('Prepare Reviewer').item.json.provider_call_id, provider_payload: $json } }}",
+        "options": {
+          "timeout": 600000
+        }
+      },
       "id": "00000000-0000-4000-8000-000000000023",
       "name": "Normalize Reviewer",
-      "type": "n8n-nodes-base.noOp",
-      "typeVersion": 1,
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "onError": "continueErrorOutput",
       "position": [
         3520,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.status }}",
+              "rightValue": "repair_requested",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "00000000-0000-4000-8000-000000000033",
+      "name": "Reviewer Decision",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        3680,
         0
       ]
     },
@@ -519,8 +669,274 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        3680,
+        3840,
         0
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "00000000-0000-4000-8000-000000000025-call",
+              "name": "provider_call_id",
+              "value": "={{ $('Prepare Selector').item.json.provider_call_id }}",
+              "type": "string"
+            },
+            {
+              "id": "00000000-0000-4000-8000-000000000025-class",
+              "name": "failure_class",
+              "value": "={{ Number($json.error?.httpCode ?? $json.error?.statusCode ?? $json.error?.cause?.statusCode ?? $json.statusCode ?? 0) === 429 ? 'rate_limited' : (Number($json.error?.httpCode ?? $json.error?.statusCode ?? $json.error?.cause?.statusCode ?? $json.statusCode ?? 0) >= 500 && Number($json.error?.httpCode ?? $json.error?.statusCode ?? $json.error?.cause?.statusCode ?? $json.statusCode ?? 0) < 600 ? 'transient_server' : (Number($json.error?.httpCode ?? $json.error?.statusCode ?? $json.error?.cause?.statusCode ?? $json.statusCode ?? 0) >= 400 && Number($json.error?.httpCode ?? $json.error?.statusCode ?? $json.error?.cause?.statusCode ?? $json.statusCode ?? 0) < 500 ? 'definite_rejection' : 'ambiguous_transport')) }}",
+              "type": "string"
+            },
+            {
+              "id": "00000000-0000-4000-8000-000000000025-status",
+              "name": "http_status",
+              "value": "={{ Number($json.error?.httpCode ?? $json.error?.statusCode ?? $json.error?.cause?.statusCode ?? $json.statusCode ?? 0) }}",
+              "type": "number"
+            },
+            {
+              "id": "00000000-0000-4000-8000-000000000025-code",
+              "name": "error_code",
+              "value": "={{ 'selector_provider_http_' + String(Number($json.error?.httpCode ?? $json.error?.statusCode ?? $json.error?.cause?.statusCode ?? $json.statusCode ?? 0)) }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "00000000-0000-4000-8000-000000000025",
+      "name": "Classify Selector Provider Error",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1120,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "00000000-0000-4000-8000-000000000026-call",
+              "name": "provider_call_id",
+              "value": "={{ $('Prepare Selector').item.json.provider_call_id }}",
+              "type": "string"
+            },
+            {
+              "id": "00000000-0000-4000-8000-000000000026-class",
+              "name": "failure_class",
+              "value": "={{ Number($json.error?.httpCode ?? $json.error?.statusCode ?? $json.error?.cause?.statusCode ?? $json.statusCode ?? 0) >= 400 && Number($json.error?.httpCode ?? $json.error?.statusCode ?? $json.error?.cause?.statusCode ?? $json.statusCode ?? 0) < 500 ? 'invalid_response' : 'ambiguous_transport' }}",
+              "type": "string"
+            },
+            {
+              "id": "00000000-0000-4000-8000-000000000026-status",
+              "name": "http_status",
+              "value": "={{ Number($json.error?.httpCode ?? $json.error?.statusCode ?? $json.error?.cause?.statusCode ?? $json.statusCode ?? 0) }}",
+              "type": "number"
+            },
+            {
+              "id": "00000000-0000-4000-8000-000000000026-code",
+              "name": "error_code",
+              "value": "={{ 'selector_normalize_http_' + String(Number($json.error?.httpCode ?? $json.error?.statusCode ?? $json.error?.cause?.statusCode ?? $json.statusCode ?? 0)) }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "00000000-0000-4000-8000-000000000026",
+      "name": "Classify Selector Normalize Error",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1280,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "00000000-0000-4000-8000-000000000027-call",
+              "name": "provider_call_id",
+              "value": "={{ $('Prepare Generator').item.json.provider_call_id }}",
+              "type": "string"
+            },
+            {
+              "id": "00000000-0000-4000-8000-000000000027-class",
+              "name": "failure_class",
+              "value": "={{ Number($json.error?.httpCode ?? $json.error?.statusCode ?? $json.error?.cause?.statusCode ?? $json.statusCode ?? 0) === 429 ? 'rate_limited' : (Number($json.error?.httpCode ?? $json.error?.statusCode ?? $json.error?.cause?.statusCode ?? $json.statusCode ?? 0) >= 500 && Number($json.error?.httpCode ?? $json.error?.statusCode ?? $json.error?.cause?.statusCode ?? $json.statusCode ?? 0) < 600 ? 'transient_server' : (Number($json.error?.httpCode ?? $json.error?.statusCode ?? $json.error?.cause?.statusCode ?? $json.statusCode ?? 0) >= 400 && Number($json.error?.httpCode ?? $json.error?.statusCode ?? $json.error?.cause?.statusCode ?? $json.statusCode ?? 0) < 500 ? 'definite_rejection' : 'ambiguous_transport')) }}",
+              "type": "string"
+            },
+            {
+              "id": "00000000-0000-4000-8000-000000000027-status",
+              "name": "http_status",
+              "value": "={{ Number($json.error?.httpCode ?? $json.error?.statusCode ?? $json.error?.cause?.statusCode ?? $json.statusCode ?? 0) }}",
+              "type": "number"
+            },
+            {
+              "id": "00000000-0000-4000-8000-000000000027-code",
+              "name": "error_code",
+              "value": "={{ 'generator_provider_http_' + String(Number($json.error?.httpCode ?? $json.error?.statusCode ?? $json.error?.cause?.statusCode ?? $json.statusCode ?? 0)) }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "00000000-0000-4000-8000-000000000027",
+      "name": "Classify Generator Provider Error",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2240,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "00000000-0000-4000-8000-000000000028-call",
+              "name": "provider_call_id",
+              "value": "={{ $('Prepare Generator').item.json.provider_call_id }}",
+              "type": "string"
+            },
+            {
+              "id": "00000000-0000-4000-8000-000000000028-class",
+              "name": "failure_class",
+              "value": "={{ Number($json.error?.httpCode ?? $json.error?.statusCode ?? $json.error?.cause?.statusCode ?? $json.statusCode ?? 0) >= 400 && Number($json.error?.httpCode ?? $json.error?.statusCode ?? $json.error?.cause?.statusCode ?? $json.statusCode ?? 0) < 500 ? 'invalid_response' : 'ambiguous_transport' }}",
+              "type": "string"
+            },
+            {
+              "id": "00000000-0000-4000-8000-000000000028-status",
+              "name": "http_status",
+              "value": "={{ Number($json.error?.httpCode ?? $json.error?.statusCode ?? $json.error?.cause?.statusCode ?? $json.statusCode ?? 0) }}",
+              "type": "number"
+            },
+            {
+              "id": "00000000-0000-4000-8000-000000000028-code",
+              "name": "error_code",
+              "value": "={{ 'generator_normalize_http_' + String(Number($json.error?.httpCode ?? $json.error?.statusCode ?? $json.error?.cause?.statusCode ?? $json.statusCode ?? 0)) }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "00000000-0000-4000-8000-000000000028",
+      "name": "Classify Generator Normalize Error",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2400,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "00000000-0000-4000-8000-000000000029-call",
+              "name": "provider_call_id",
+              "value": "={{ $('Prepare Reviewer').item.json.provider_call_id }}",
+              "type": "string"
+            },
+            {
+              "id": "00000000-0000-4000-8000-000000000029-class",
+              "name": "failure_class",
+              "value": "={{ Number($json.error?.httpCode ?? $json.error?.statusCode ?? $json.error?.cause?.statusCode ?? $json.statusCode ?? 0) === 429 ? 'rate_limited' : (Number($json.error?.httpCode ?? $json.error?.statusCode ?? $json.error?.cause?.statusCode ?? $json.statusCode ?? 0) >= 500 && Number($json.error?.httpCode ?? $json.error?.statusCode ?? $json.error?.cause?.statusCode ?? $json.statusCode ?? 0) < 600 ? 'transient_server' : (Number($json.error?.httpCode ?? $json.error?.statusCode ?? $json.error?.cause?.statusCode ?? $json.statusCode ?? 0) >= 400 && Number($json.error?.httpCode ?? $json.error?.statusCode ?? $json.error?.cause?.statusCode ?? $json.statusCode ?? 0) < 500 ? 'definite_rejection' : 'ambiguous_transport')) }}",
+              "type": "string"
+            },
+            {
+              "id": "00000000-0000-4000-8000-000000000029-status",
+              "name": "http_status",
+              "value": "={{ Number($json.error?.httpCode ?? $json.error?.statusCode ?? $json.error?.cause?.statusCode ?? $json.statusCode ?? 0) }}",
+              "type": "number"
+            },
+            {
+              "id": "00000000-0000-4000-8000-000000000029-code",
+              "name": "error_code",
+              "value": "={{ 'reviewer_provider_http_' + String(Number($json.error?.httpCode ?? $json.error?.statusCode ?? $json.error?.cause?.statusCode ?? $json.statusCode ?? 0)) }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "00000000-0000-4000-8000-000000000029",
+      "name": "Classify Reviewer Provider Error",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        3360,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "00000000-0000-4000-8000-000000000030-call",
+              "name": "provider_call_id",
+              "value": "={{ $('Prepare Reviewer').item.json.provider_call_id }}",
+              "type": "string"
+            },
+            {
+              "id": "00000000-0000-4000-8000-000000000030-class",
+              "name": "failure_class",
+              "value": "={{ Number($json.error?.httpCode ?? $json.error?.statusCode ?? $json.error?.cause?.statusCode ?? $json.statusCode ?? 0) >= 400 && Number($json.error?.httpCode ?? $json.error?.statusCode ?? $json.error?.cause?.statusCode ?? $json.statusCode ?? 0) < 500 ? 'invalid_response' : 'ambiguous_transport' }}",
+              "type": "string"
+            },
+            {
+              "id": "00000000-0000-4000-8000-000000000030-status",
+              "name": "http_status",
+              "value": "={{ Number($json.error?.httpCode ?? $json.error?.statusCode ?? $json.error?.cause?.statusCode ?? $json.statusCode ?? 0) }}",
+              "type": "number"
+            },
+            {
+              "id": "00000000-0000-4000-8000-000000000030-code",
+              "name": "error_code",
+              "value": "={{ 'reviewer_normalize_http_' + String(Number($json.error?.httpCode ?? $json.error?.statusCode ?? $json.error?.cause?.statusCode ?? $json.statusCode ?? 0)) }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "00000000-0000-4000-8000-000000000030",
+      "name": "Classify Reviewer Normalize Error",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        3520,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=http://127.0.0.1:8121/v1/provider-calls/{{ $json.provider_call_id }}/failure",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { failure_class: $json.failure_class, http_status: Number($json.http_status) >= 100 ? Number($json.http_status) : null, error_code: $json.error_code } }}",
+        "options": {
+          "timeout": 600000
+        }
+      },
+      "id": "00000000-0000-4000-8000-000000000031",
+      "name": "Record Provider Failure",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        3840,
+        400
       ]
     }
   ],
@@ -569,7 +985,7 @@
       "main": [
         [
           {
-            "node": "Build Selector Request",
+            "node": "Resume Stage",
             "type": "main",
             "index": 0
           }
@@ -583,11 +999,11 @@
         ]
       ]
     },
-    "Build Selector Request": {
+    "Prepare Selector": {
       "main": [
         [
           {
-            "node": "Selector Mode",
+            "node": "OpenAI Selector",
             "type": "main",
             "index": 0
           }
@@ -605,7 +1021,7 @@
         ],
         [
           {
-            "node": "Live Selector",
+            "node": "Prepare Selector",
             "type": "main",
             "index": 0
           }
@@ -616,20 +1032,27 @@
       "main": [
         [
           {
-            "node": "Normalize Selector",
+            "node": "Lock Evidence",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Live Selector": {
+    "OpenAI Selector": {
       "main": [
         [
           {
             "node": "Normalize Selector",
             "type": "main",
-            "index": 1
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Classify Selector Provider Error",
+            "type": "main",
+            "index": 0
           }
         ]
       ]
@@ -639,6 +1062,13 @@
         [
           {
             "node": "Lock Evidence",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Classify Selector Normalize Error",
             "type": "main",
             "index": 0
           }
@@ -660,7 +1090,7 @@
       "main": [
         [
           {
-            "node": "Build Generator Request",
+            "node": "Generator Mode",
             "type": "main",
             "index": 0
           }
@@ -674,11 +1104,11 @@
         ]
       ]
     },
-    "Build Generator Request": {
+    "Prepare Generator": {
       "main": [
         [
           {
-            "node": "Generator Mode",
+            "node": "OpenAI Generator",
             "type": "main",
             "index": 0
           }
@@ -696,7 +1126,7 @@
         ],
         [
           {
-            "node": "Live Generator",
+            "node": "Prepare Generator",
             "type": "main",
             "index": 0
           }
@@ -707,20 +1137,27 @@
       "main": [
         [
           {
-            "node": "Normalize Generator",
+            "node": "Deterministic Gates",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Live Generator": {
+    "OpenAI Generator": {
       "main": [
         [
           {
             "node": "Normalize Generator",
             "type": "main",
-            "index": 1
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Classify Generator Provider Error",
+            "type": "main",
+            "index": 0
           }
         ]
       ]
@@ -730,6 +1167,13 @@
         [
           {
             "node": "Deterministic Gates",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Classify Generator Normalize Error",
             "type": "main",
             "index": 0
           }
@@ -751,7 +1195,7 @@
       "main": [
         [
           {
-            "node": "Build Reviewer Request",
+            "node": "Reviewer Mode",
             "type": "main",
             "index": 0
           }
@@ -765,11 +1209,11 @@
         ]
       ]
     },
-    "Build Reviewer Request": {
+    "Prepare Reviewer": {
       "main": [
         [
           {
-            "node": "Reviewer Mode",
+            "node": "OpenAI Reviewer",
             "type": "main",
             "index": 0
           }
@@ -787,7 +1231,7 @@
         ],
         [
           {
-            "node": "Live Reviewer",
+            "node": "Prepare Reviewer",
             "type": "main",
             "index": 0
           }
@@ -798,26 +1242,149 @@
       "main": [
         [
           {
-            "node": "Normalize Reviewer",
+            "node": "Record Terminal Outcome",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Live Reviewer": {
+    "OpenAI Reviewer": {
       "main": [
         [
           {
             "node": "Normalize Reviewer",
             "type": "main",
-            "index": 1
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Classify Reviewer Provider Error",
+            "type": "main",
+            "index": 0
           }
         ]
       ]
     },
     "Normalize Reviewer": {
       "main": [
+        [
+          {
+            "node": "Reviewer Decision",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Classify Reviewer Normalize Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Classify Selector Provider Error": {
+      "main": [
+        [
+          {
+            "node": "Record Provider Failure",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Classify Selector Normalize Error": {
+      "main": [
+        [
+          {
+            "node": "Record Provider Failure",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Classify Generator Provider Error": {
+      "main": [
+        [
+          {
+            "node": "Record Provider Failure",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Classify Generator Normalize Error": {
+      "main": [
+        [
+          {
+            "node": "Record Provider Failure",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Classify Reviewer Provider Error": {
+      "main": [
+        [
+          {
+            "node": "Record Provider Failure",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Classify Reviewer Normalize Error": {
+      "main": [
+        [
+          {
+            "node": "Record Provider Failure",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Resume Stage": {
+      "main": [
+        [
+          {
+            "node": "Selector Mode",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Generator Mode",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Reviewer Mode",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reviewer Decision": {
+      "main": [
+        [
+          {
+            "node": "Prepare Generator",
+            "type": "main",
+            "index": 0
+          }
+        ],
         [
           {
             "node": "Record Terminal Outcome",
